@@ -9,6 +9,7 @@ import {
   ThemeProvider,
 } from '@mui/material/styles';
 import Upload from './components/Upload';
+import Home from './components/Home';
 
 let theme = createTheme(
   {
@@ -52,7 +53,7 @@ function App() {
     <ThemeProvider theme={theme}>
       {/* <CssBaseline /> */}
       <Routes>
-        <Route path="/upload" element={<Upload />} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </ThemeProvider>
   );

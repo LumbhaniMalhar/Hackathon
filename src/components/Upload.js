@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Skeleton,
   Stack,
   TextField,
@@ -18,8 +19,10 @@ import { createWorker } from "tesseract.js";
 export default function Upload() {
   const [imageData, setImageData] = React.useState("");
   const [textData, setTextData] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const [code, setCode] = React.useState("");
   const convertImageToText = async (file) => {
+    setLoading(true);
     const worker = await createWorker({
       logger: (m) => console.log(m),
     });
@@ -30,24 +33,29 @@ export default function Upload() {
       console.log("selectedImage", file);
       const { data } = await worker.recognize(file);
       console.log("data", data.text);
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-      var raw = JSON.stringify({
-        text: data.text,
-      });
-      var requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow",
-      };
-      fetch("http://localhost:8000/explain", requestOptions)
-        .then((response) => response.json())
-        .then((result) => {
-          console.log(result);
-          setTextData(result.data);
-        })
-        .catch((error) => console.log("error", error));
+      // var myHeaders = new Headers();
+      // myHeaders.append("Content-Type", "application/json");
+      // var raw = JSON.stringify({
+      //   text: data.text,
+      // });
+      // var requestOptions = {
+      //   method: "POST",
+      //   headers: myHeaders,
+      //   body: raw,
+      //   redirect: "follow",
+      // };
+      // fetch("http://localhost:8000/explain", requestOptions)
+      //   .then((response) => response.json())
+      //   .then((result) => {
+      //     console.log(result);
+      //     setTextData(result.data);
+      //   })
+      //   .catch((error) => console.log("error", error));
+      const response = await makeSimpleText(data.text);
+      if (response.data) {
+        setTextData(response.data);
+      }
+      setLoading(false)
       // setTextResult(data.text);
     } catch (error) {
       console.log("error", error);
@@ -80,7 +88,7 @@ export default function Upload() {
       body: raw,
       redirect: "follow",
     };
-    let response = await fetch("http://localhost:8000/explain", requestOptions);
+    let response = await fetch("https://a77e-69-166-117-246.ngrok.io/explain", requestOptions);
     let result = response.json();
     return result;
   }
@@ -97,11 +105,13 @@ export default function Upload() {
   }
 
   const handleTextChange = async (value) => {
+    setLoading(true);
     console.log("hello11");
     const response = await makeSimpleText(value);
     if (response.data) {
       setTextData(response.data);
     }
+    setLoading(false);
   };
 
   return (
@@ -112,48 +122,18 @@ export default function Upload() {
         mt: 10,
         boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
       }}
-      gap={1}
+      // gap={1}
       justifyContent={"center"}
     >
-      {/* <Stack direction="column" alignItems="center" spacing={2}>
-          <Button variant="contained" component="label">
-            Upload
-            <input
-              hidden
-              accept="image/*"
-              type="file"
-              onChange={(e) => getImageData(e.target.files[0])}
-            />
-          </Button>
-          <Stack sx={{ p: 2, boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
-            <Typography variant="h5">{textData}</Typography>
-          </Stack>
-
-          {imageData && (
-            <Stack sx={{ p: 2, boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
-              <Box
-                component="img"
-                sx={{
-                  content: `url(${imageData})`,
-                  height: { xs: "75vw", sm: "175px", md: "250px", lg: "300px" },
-                  maxWidth: "350px",
-                  objectFit: "contain",
-                }}
-                alt="Logo"
-              />
-            </Stack>
-          )}
-        </Stack> */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
         sx={{
           p: 0,
           m: 2,
-          // boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
           minHeight: "350px",
         }}
-        gap={0}
+        gap={2}
       >
         {!imageData && (
           <Editor
@@ -162,14 +142,19 @@ export default function Upload() {
             onValueChange={(code) => {
               setCode(code);
               // debounce(handleTextChange(code))
-              handleTextChange(code);
+              if(code.length>10){
+                debounce(handleTextChange(code))
+                // handleTextChange(code);
+              }
             }}
             highlight={(code) => highlight(code, languages.js)}
             padding={10}
             style={{
+              // margin: 5,
               fontFamily: '"Fira code", "Fira Mono", monospace',
               fontSize: 20,
-              minWidth: "48%",
+              minWidth: "50%",
+              maxWidth: { xs: "50%", sm: "50%", },
               height: "350px",
               overflow: "scroll",
               border: "1px solid grey",
@@ -181,15 +166,14 @@ export default function Upload() {
             component="img"
             sx={{
               content: `url(${imageData})`,
-              // height: { xs: "75vw", sm: "175px", md: "250px", lg: "300px" },
               height: "350px",
-              minWidth: "48%",
+              minWidth: "50%",
               objectFit: "contain",
             }}
             alt="Logo"
           />
         )}
-        <Editor
+        {!loading && <Editor
           disabled
           value={textData}
           onValueChange={(code) => setTextData(code)}
@@ -198,12 +182,27 @@ export default function Upload() {
           style={{
             fontFamily: '"Fira code", "Fira Mono", monospace',
             fontSize: 20,
-            minWidth: "48%",
+            minWidth: "50%",
             height: "350px",
             overflow: "scroll",
             border: "1px solid grey",
           }}
-        />
+        />}
+        {loading && <Stack
+          sx={{
+            minWidth: "50%",
+            maxWidth: { xs: "100%", sm: "50%", },
+            height: "350px",
+            overflow: "scroll",
+            border: "1px solid grey",
+          }}
+          justifyContent={'center'}
+          alignItems={'center'}
+        >
+          <Box sx={{ display: loading ? 'flex' : 'none', }}>
+            <CircularProgress sx={{ color: 'black' }} />
+          </Box>
+        </Stack>}
       </Stack>
       <Stack
         direction={"row"}
@@ -218,6 +217,7 @@ export default function Upload() {
             component="label"
             fullWidth={false}
             sx={{ minWidth: "0px", backgroundColor: "black" }}
+            disabled={loading}
           >
             Upload image
             <input
@@ -236,6 +236,7 @@ export default function Upload() {
               onClick={() => {
                 setImageData("");
               }}
+              disabled={loading}
             >
               Add Text
             </Button>
