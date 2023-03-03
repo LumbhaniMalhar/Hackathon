@@ -11,3 +11,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.textarea-code{
+  height: 350px!important;
+  overflow: auto!important;
+}
