@@ -1,10 +1,17 @@
 import * as React from "react";
-import { Box, Button, Skeleton, Stack, TextField, Typography } from "@mui/material";
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism.css';
+import {
+  Box,
+  Button,
+  Skeleton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import Editor from "react-simple-code-editor";
+import { highlight, languages } from "prismjs/components/prism-core";
+import "prismjs/components/prism-clike";
+import "prismjs/components/prism-javascript";
+import "prismjs/themes/prism.css";
 import { maxWidth } from "@mui/system";
 import { createWorker } from "tesseract.js";
 
@@ -73,33 +80,29 @@ export default function Upload() {
       body: raw,
       redirect: "follow",
     };
-    fetch("http://localhost:8000/explain", requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        console.log(result);
-        return result;
-        // setTextData(result.data);
-      })
-      .catch((error) => console.log("error", error));
+    let response = await fetch("http://localhost:8000/explain", requestOptions);
+    let result = response.json();
+    return result;
   }
 
   function debounce(func, timeout = 1000) {
-    console.log({func})
+    console.log({ func });
     let timer;
     return (...args) => {
       clearTimeout(timer);
-      timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, timeout);
     };
   }
 
-
   const handleTextChange = async (value) => {
-    console.log("hello11")
+    console.log("hello11");
     const response = await makeSimpleText(value);
-    if(response.data) {
+    if (response.data) {
       setTextData(response.data);
     }
-  }
+  };
 
   return (
     <Stack
@@ -107,10 +110,10 @@ export default function Upload() {
         m: 2,
         p: 2,
         mt: 10,
-        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+        boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
       }}
       gap={1}
-      justifyContent={'center'}
+      justifyContent={"center"}
     >
       {/* <Stack direction="column" alignItems="center" spacing={2}>
           <Button variant="contained" component="label">
@@ -142,73 +145,80 @@ export default function Upload() {
           )}
         </Stack> */}
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
+        direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
         sx={{
           p: 0,
           m: 2,
           // boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-          minHeight: '350px'
+          minHeight: "350px",
         }}
         gap={0}
       >
-        {!imageData && <Editor
-          placeholder="Write about your topic that needs to be simplified"
-          value={code}
-          onValueChange={code => {
-            setCode(code)
-            // debounce(handleTextChange(code))
-            handleTextChange(code)
-          }}
-          highlight={code => highlight(code, languages.js)}
-          padding={10}
-          style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 20,
-            minWidth: '48%',
-            height: '350px',
-            overflow: 'scroll',
-            border: '1px solid grey'
-          }}
-        />}
-        {imageData &&
+        {!imageData && (
+          <Editor
+            placeholder="Write about your topic that needs to be simplified"
+            value={code}
+            onValueChange={(code) => {
+              setCode(code);
+              // debounce(handleTextChange(code))
+              handleTextChange(code);
+            }}
+            highlight={(code) => highlight(code, languages.js)}
+            padding={10}
+            style={{
+              fontFamily: '"Fira code", "Fira Mono", monospace',
+              fontSize: 20,
+              minWidth: "48%",
+              height: "350px",
+              overflow: "scroll",
+              border: "1px solid grey",
+            }}
+          />
+        )}
+        {imageData && (
           <Box
             component="img"
             sx={{
               content: `url(${imageData})`,
               // height: { xs: "75vw", sm: "175px", md: "250px", lg: "300px" },
-              height: '350px',
+              height: "350px",
               minWidth: "48%",
               objectFit: "contain",
             }}
             alt="Logo"
           />
-        }
+        )}
         <Editor
           disabled
           value={textData}
-          onValueChange={code => setTextData(code)}
-          highlight={code => highlight(code, languages.js)}
+          onValueChange={(code) => setTextData(code)}
+          highlight={(code) => highlight(code, languages.js)}
           padding={10}
           style={{
             fontFamily: '"Fira code", "Fira Mono", monospace',
             fontSize: 20,
-            minWidth: '48%',
-            height: '350px',
-            overflow: 'scroll',
-            border: '1px solid grey'
+            minWidth: "48%",
+            height: "350px",
+            overflow: "scroll",
+            border: "1px solid grey",
           }}
         />
       </Stack>
       <Stack
-        direction={'row'}
+        direction={"row"}
         sx={{
           p: 0,
           m: 2,
         }}
       >
-        <Stack direction={'row'} gap={1}>
-          <Button variant="contained" component="label" fullWidth={false} sx={{ minWidth: '0px', backgroundColor: 'black' }} >
+        <Stack direction={"row"} gap={1}>
+          <Button
+            variant="contained"
+            component="label"
+            fullWidth={false}
+            sx={{ minWidth: "0px", backgroundColor: "black" }}
+          >
             Upload image
             <input
               hidden
@@ -217,17 +227,19 @@ export default function Upload() {
               onChange={(e) => getImageData(e.target.files[0])}
             />
           </Button>
-          {imageData && <Button
-            variant="contained"
-            component="label"
-            fullWidth={false}
-            sx={{ minWidth: '0px', backgroundColor: 'black' }}
-            onClick={() => {
-              setImageData("")
-            }}
-          >
-            Add Text
-          </Button>}
+          {imageData && (
+            <Button
+              variant="contained"
+              component="label"
+              fullWidth={false}
+              sx={{ minWidth: "0px", backgroundColor: "black" }}
+              onClick={() => {
+                setImageData("");
+              }}
+            >
+              Add Text
+            </Button>
+          )}
         </Stack>
       </Stack>
     </Stack>
